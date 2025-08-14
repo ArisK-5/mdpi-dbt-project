@@ -1,0 +1,21 @@
+models:
+  - name: monthly_invoiced_variation
+    description: "Month-over-month total invoiced amount and its percentage variation."
+    columns:
+      - name: month
+        description: "Month bucket."
+        tests:
+          - not_null
+          - unique
+      - name: invoiced_amount
+        description: "Total invoiced amount (sum of order_total) for the month."
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: prev_invoiced_amount
+        description: "Total invoiced amount for the previous month."
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: invoiced_variation_pct
+        description: "Percentage change vs previous month. Null when previous month is missing or zero."

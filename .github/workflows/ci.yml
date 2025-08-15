@@ -60,7 +60,8 @@ jobs:
             models/**/*.sql
 
       - name: Lint SQL with SQLFluff (dbt templater)
-        run: sqlfluff lint models --format github-annotation --exit-zero
+        run: sqlfluff lint models --format github-annotation
+        continue-on-error: true
 
   build-pr:
     name: dbt build on ephemeral Postgres (PRs)

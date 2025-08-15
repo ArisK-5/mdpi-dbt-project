@@ -15,24 +15,26 @@ permissions:
 
 jobs:
   lint:
-    name: SQLFluff + dbt parse
+    name: SQLFluff + dbt parse (auto-fix)
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: |
-            pyproject.toml
+          cache-dependency-path: pyproject.toml
 
-      - name: Install tooling
+      - name: Install lint tooling
         run: |
           python -m pip install --upgrade pip
           pip install "sqlfluff~=3.4" "sqlfluff-templater-dbt~=3.4.2" "dbt-duckdb~=1.9.4"
@@ -40,11 +42,24 @@ jobs:
       - name: Install dbt packages
         run: dbt deps
 
+      - name: dbt parse (lint target)
+        run: dbt parse --target lint
+
+      - name: Auto-fix SQL with SQLFluff
+        run: sqlfluff fix models --force
+
+      - name: Commit and push fixes (same-repo branches only)
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(sqlfluff): auto-fix formatting"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          file_pattern: |
+            models/**/*.sql
+
       - name: Lint SQL with SQLFluff (dbt templater)
         run: sqlfluff lint models --format github-annotation
-
-      - name: Parse dbt project (syntax/render checks)
-        run: dbt parse --target lint
 
   build-pr:
     name: dbt build on ephemeral Postgres (PRs)

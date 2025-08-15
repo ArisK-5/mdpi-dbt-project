@@ -83,7 +83,7 @@ jobs:
           --health-retries=20
     env:
       DBT_PROFILES_DIR: ${{ github.workspace }}
-      DB_HOST: postgres
+      DB_HOST: 127.0.0.1
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: postgres

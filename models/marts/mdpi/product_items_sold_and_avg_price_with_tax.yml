@@ -1,0 +1,18 @@
+models:
+  - name: product_items_sold_and_avg_price_with_tax
+    description: "Per product: items sold and average item price including location tax_rate."
+    columns:
+      - name: product_id
+        description: "Product identifier."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('products')
+              field: product_id
+      - name: product_name
+        description: "Product display name."
+      - name: items_sold
+        description: "Total count of order items for the product."
+      - name: avg_price_with_tax
+        description: "Average realized item price including tax (product_price x (1 + tax_rate))."

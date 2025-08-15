@@ -1,0 +1,17 @@
+models:
+  - name: total_cost_by_supply_and_product_type_2016
+    description: "Total supply cost for items sold in 2016, aggregated by supply and product type."
+    columns:
+      - name: supply_name
+        description: "Name of the supply consumed by the product."
+        tests:
+          - not_null
+      - name: product_type
+        description: "Product category/type."
+        tests:
+          - not_null
+      - name: total_cost_2016
+        description: "Total cost = (items sold in 2016) x (supply cost) aggregated by supply and product type."
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"

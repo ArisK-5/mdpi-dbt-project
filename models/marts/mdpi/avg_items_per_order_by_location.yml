@@ -1,0 +1,18 @@
+models:
+  - name: avg_items_per_order_by_location
+    description: "Average number of items in orders by location."
+    columns:
+      - name: location_id
+        description: "Unique identifier of the store where the order was placed."
+        tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('locations')
+              field: location_id
+      - name: location_name
+        description: "Human-readable store name."
+      - name: orders_count
+        description: "Number of orders considered for the location."
+      - name: avg_items_per_order
+        description: "Average count of items per order for the location."

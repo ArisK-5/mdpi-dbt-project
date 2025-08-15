@@ -1,12 +1,16 @@
 [sqlfluff]
-templater = dbt-cloud
-dialect = snowflake
-runaway_limit = 10
-max_line_length = 80
+dialect = postgres
+templater = dbt
+exclude_rules = ST06
+max_line_length = 0
+processes = -1
 indent_unit = space
 
 [sqlfluff:templater:dbt]
+project_dir = .
 profiles_dir = .
+profile = postgres-dbt
+target = lint
 
 [sqlfluff:indentation]
 tab_space_size = 4
@@ -15,7 +19,7 @@ tab_space_size = 4
 spacing_before = touch
 line_position = trailing
 
-[sqlfluff:rules:capitalisation.keywords]
+[sqlfluff:rules:capitalisation.keywords] 
 capitalisation_policy = lower
 
 [sqlfluff:rules:aliasing.table]
@@ -35,6 +39,3 @@ capitalisation_policy = lower
 
 [sqlfluff:rules:capitalisation.literals]
 capitalisation_policy = lower
-
-[sqlfluff:rules:ambiguous.column_references]  # Number in group by
-group_by_and_order_by_style = implicit

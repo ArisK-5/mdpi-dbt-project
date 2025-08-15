@@ -1,0 +1,30 @@
+models:
+  - name: top_customers_by_month
+    description: "Top 3 customers by invoiced amount (order_total) for each calendar month."
+    columns:
+      - name: month
+        description: "Month bucket of the order date."
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Customer identifier."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('customers')
+              field: customer_id
+      - name: customer_name
+        description: "Customer display name."
+        tests:
+          - not_null
+      - name: invoiced_amount
+        description: "Sum of order_total for the customer in the given month."
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+      - name: customer_rank
+        description: "Dense rank within the month by invoiced_amount (1 = highest)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3]

@@ -20,7 +20,7 @@ This repository contains the **Jaffle Shop DBT project** for the MDPI Data Engin
 
 Make sure you have the following installed:
 
-- Python 3.8+
+- Python 3.9+
 - [Git](https://git-scm.com/downloads)
 - [UV](https://docs.astral.sh/uv/getting-started/) (Python project and dependency manager)
 - [direnv](https://direnv.net) (for loading environment variables automatically)

@@ -1,0 +1,30 @@
+repos:
+  - repo: local
+    hooks:
+      - id: dbt-deps
+        name: dbt deps (ensure packages present for templater)
+        language: python
+        additional_dependencies: [dbt-duckdb~=1.9.4]
+        entry: dbt
+        args: [deps]
+        pass_filenames: false
+        always_run: true
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: v3.4.2
+    hooks:
+      - id: sqlfluff-lint
+        name: sqlfluff (dbt templater)
+        args: [--format, github-annotation]
+        additional_dependencies:
+          - sqlfluff-templater-dbt~=3.4.2
+          - dbt-duckdb~=1.9.4
+        files: ^(models)/.*\.sql$
+      # Optional: run manually to auto-fix safe issues
+      - id: sqlfluff-fix
+        name: sqlfluff fix (manual)
+        stages: [manual]
+        additional_dependencies:
+          - sqlfluff-templater-dbt~=3.4.2
+          - dbt-duckdb~=1.9.4
+        files: ^(models)/.*\.sql$

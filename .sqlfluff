@@ -10,6 +10,7 @@ indent_unit = space
 project_dir = .
 profiles_dir = .
 profile = postgres-dbt
+target = lint
 
 [sqlfluff:indentation]
 tab_space_size = 4

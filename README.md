@@ -12,7 +12,7 @@ This repository contains the **Jaffle Shop DBT project** for the MDPI Data Engin
   - [2. Set Up and Connect to the Database](#2-set-up-and-connect-to-the-database)
   - [3. DBT Setup](#3-dbt-setup)
 - [Database Structure](#database-structure)
-- [CI Workflow](#ci-workflow)
+- [CI Workflow](#ci-linting-workflow)
 
 ---
 
@@ -149,17 +149,46 @@ mdpi_dbt_postgres/databases/dbt_warehouse/schemas/marts/tables
 
 ---
 
-## CI Workflow
+## CI Linting Workflow
 
-**Triggers**: runs on pull requests, pushes to main, and manual runs (workflow_dispatch). Concurrency cancels older runs on the same ref.
+This workflow enforces SQL style in the dbt project and auto-fixes safe issues on branches.
 
-**Lint job**: installs dbt + SQLFluff, sets `DBT_PROFILES_DIR` to the repo, applies inert DB env defaults, lints SQL with the dbt templater, and runs dbt parse to validate rendering.
+> What it does
 
-**PR build**: spins up an ephemeral Postgres service, installs dbt, runs dbt deps/debug, then dbt seed and dbt build with tests; also generates docs.
+- Parses the dbt project with a safe DuckDB “lint” target to avoid real database connections.
+- Runs sqlfluff fix on models to auto-apply formatting.
+- Commits any changes back to the branch (same-repo branches and non-fork PRs).
+- Runs sqlfluff lint to publish annotations on the PR without failing the build.
 
-**Main build**: targets your warehouse using repo secrets (with safe fallbacks) and runs dbt seed and dbt build; `DBT_TARGET` can be overridden via repo variables.
-Permissions are minimal (contents: read).
+> When it runs
 
-Normally, the CI workflow requires certain sensitive credentials that we would provide via Github Secrets or similar method. To avoid unnecessary hassle, the default values in .env.example are provided in the ci script (`.github/workflows/ci.yml`). If you didn't modifiy any of them then the workflow should work as is.
+- On pull_request, on pushes to main, and on manual runs (workflow_dispatch).
+- Concurrency ensures only one run per ref.
 
-If you did make any modifications, then you would also need to modify the defaults in the script above or add these repository secrets (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_SCHEMA) using the [Github CLI](https://cli.github.com) or [manualy](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?tool=webui) in the repo's page.
+> How it works
+
+1. Checkout repo and set up Python 3.11.
+
+2. Install tooling: `sqlfluff`, `sqlfluff-templater-dbt`, `dbt-duckdb`.
+
+3. `dbt deps` to install packages.
+
+4. `dbt parse --target lint` to compile models using the DuckDB target defined in profiles.yml.
+
+5. `sqlfluff fix models` (non-blocking) to auto-fix format issues.
+
+6. Auto-commit fixes to the branch when permitted (same-repo branches only).
+
+7. `sqlfluff lint models --format github-annotation` (non-blocking) to add inline annotations to the PR Checks tab.
+
+> Key configuration
+
+- .sqlfluff is set to `templater = dbt` with profile `postgres-dbt` and `target = lint`, using DuckDB per `profiles.yml` to keep CI self-contained.
+
+- Only `models/\*_/_.sql` are auto-committed; adjust file_pattern to include macros if desired.
+
+> Why steps are non-blocking
+
+- sqlfluff fix exits non-zero if any unfixable violations remain; continue-on-error allows the job to proceed and commit fixes.
+
+- The lint step is advisory to surface annotations; to enforce zero violations, remove continue-on-error from the final lint step.

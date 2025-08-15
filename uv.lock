@@ -2,8 +2,7 @@ version = 1
 revision = 3
 requires-python = ">=3.9"
 resolution-markers = [
-    "python_full_version >= '3.12'",
-    "python_full_version == '3.11.*'",
+    "python_full_version >= '3.11'",
     "python_full_version == '3.10.*'",
     "python_full_version < '3.10'",
 ]
@@ -166,8 +165,7 @@ name = "click"
 version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.12'",
-    "python_full_version == '3.11.*'",
+    "python_full_version >= '3.11'",
     "python_full_version == '3.10.*'",
 ]
 dependencies = [
@@ -240,7 +238,7 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "1.10.7"
+version = "1.10.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -269,9 +267,9 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/13/96/6fdcf34467ec3c6e4c27499d3b49568527ebbbcaa2060d226224eabca30f/dbt_core-1.10.7.tar.gz", hash = "sha256:b114519d3d4f56599cac519362371a44d84668cbefefbab06669f21fd5b4e683", size = 897453, upload-time = "2025-08-07T21:55:00.117Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/87/eb0f9913be5fb2651ce0b4307185a5b2a0d903efb02c9fdc80802a0b1b18/dbt_core-1.10.8.tar.gz", hash = "sha256:eb00b7169ea078aa609548258ceebaa5801605a87de33ce14fd6cbc823c9734c", size = 897380, upload-time = "2025-08-12T13:13:51.169Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/1f/d92c2df11bfa818668be32cd22a084578a5e45550e725bb7f168d5b5440e/dbt_core-1.10.7-py3-none-any.whl", hash = "sha256:ad8a20989d8acf790859b64678c430cfad42f5def12418deb2a69d22e3098622", size = 983428, upload-time = "2025-08-07T21:54:58.246Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/17/fdc3adfd4af08dfec7f75d7fc5e8c661549f88391fa9a271429433ea3533/dbt_core-1.10.8-py3-none-any.whl", hash = "sha256:117029971a32b78abc598548f63375990a9a5fcec7471aca14182dc2da7e5002", size = 983451, upload-time = "2025-08-12T13:13:49.32Z" },
 ]
 
 [[package]]
@@ -574,7 +572,7 @@ msgpack = [
 
 [[package]]
 name = "mdpi-dbt-project"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "dbt-postgres" },
@@ -583,8 +581,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dbt-postgres", specifier = ">=1.7.0" },
-    { name = "sqlfluff-templater-dbt", specifier = ">=3.4.0" },
+    { name = "dbt-postgres", specifier = "~=1.9.0" },
+    { name = "sqlfluff-templater-dbt", specifier = "~=3.4.2" },
 ]
 
 [[package]]
@@ -683,8 +681,7 @@ name = "networkx"
 version = "3.5"
 source = { registry = "https://pypi.org/simple" }
 resolution-markers = [
-    "python_full_version >= '3.12'",
-    "python_full_version == '3.11.*'",
+    "python_full_version >= '3.11'",
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/6c/4f/ccdb8ad3a38e583f214547fd2f7ff1fc160c43a75af88e6aec213404b96a/networkx-3.5.tar.gz", hash = "sha256:d4c6f9cf81f52d69230866796b82afbccdec3db7ae4fbd1b65ea750feed50037", size = 2471065, upload-time = "2025-05-29T11:35:07.804Z" }
 wheels = [

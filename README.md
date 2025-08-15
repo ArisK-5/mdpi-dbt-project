@@ -6,16 +6,17 @@ This repository contains the **Jaffle Shop DBT project** for the MDPI Data Engin
 
 ## Table of Contents
 
-- [Prerequisites](#-prerequisites)
-- [Setup Instructions](#-setup-instructions)
+- [Prerequisites](#prerequisites)
+- [Setup Instructions](#setup-instructions)
   - [1. Install Dependencies and Basic Setup](#1-install-dependencies-and-basic-setup)
   - [2. Set Up and Connect to the Database](#2-set-up-and-connect-to-the-database)
   - [3. DBT Setup](#3-dbt-setup)
-- [Directory Structure](#-directory-structure)
+- [Database Structure](#database-structure)
+- [CI Workflow](#ci-workflow)
 
 ---
 
-## 💾 Prerequisites
+## Prerequisites
 
 Make sure you have the following installed:
 
@@ -28,7 +29,7 @@ Make sure you have the following installed:
 
 ---
 
-## 🏗️ Setup Instructions
+## Setup Instructions
 
 ### 1. Install Dependencies and Basic Setup
 
@@ -124,7 +125,7 @@ dbt run
 
 ---
 
-## ⛓️ Directory Structure (PostgreSQL)
+## Database Structure
 
 After running DBT:
 
@@ -145,3 +146,20 @@ mdpi_dbt_postgres/databases/dbt_warehouse/schemas/staging/views
 ```text
 mdpi_dbt_postgres/databases/dbt_warehouse/schemas/marts/tables
 ```
+
+---
+
+## CI Workflow
+
+**Triggers**: runs on pull requests, pushes to main, and manual runs (workflow_dispatch). Concurrency cancels older runs on the same ref.
+
+**Lint job**: installs dbt + SQLFluff, sets `DBT_PROFILES_DIR` to the repo, applies inert DB env defaults, lints SQL with the dbt templater, and runs dbt parse to validate rendering.
+
+**PR build**: spins up an ephemeral Postgres service, installs dbt, runs dbt deps/debug, then dbt seed and dbt build with tests; also generates docs.
+
+**Main build**: targets your warehouse using repo secrets (with safe fallbacks) and runs dbt seed and dbt build; `DBT_TARGET` can be overridden via repo variables.
+Permissions are minimal (contents: read).
+
+Normally, the CI workflow requires certain sensitive credentials that we would provide via Github Secrets or similar method. To avoid unnecessary hassle, the default values in .env.example are provided in the ci script (`.github/workflows/ci.yml`). If you didn't modifiy any of them then the workflow should work as is.
+
+If you did make any modifications, then you would also need to modify the defaults in the script above or add these repository secrets (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_SCHEMA) using the [Github CLI](https://cli.github.com) or [manualy](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets?tool=webui) in the repo's page.

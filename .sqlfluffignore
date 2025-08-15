@@ -1,4 +1,11 @@
-target
-dbt_packages
-macros
-.venv
+# dbt build artifacts
+
+target/
+dbt_packages/
+macros/
+
+# Virtual envs and editor cruft
+
+.venv/
+.direnv/
+.vscode/

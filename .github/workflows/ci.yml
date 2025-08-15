@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch: {} # manual trigger to run on demand
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: SQLFluff + dbt parse
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            pyproject.toml
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install "sqlfluff~=3.4" "sqlfluff-templater-dbt~=3.4.2" "dbt-postgres~=1.9.0"
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      # Safe defaults so templating/parsing works on forked PRs with no secrets
+      - name: Set inert DB env (no network calls)
+        shell: bash
+        run: |
+          {
+            echo "DB_HOST=localhost"
+            echo "DB_USER=dbt_user"
+            echo "DB_PASSWORD=dbt_password"
+            echo "DB_NAME=dbt_warehouse"
+            echo "DB_SCHEMA=public"
+          } >> "$GITHUB_ENV"
+
+      - name: Lint SQL with SQLFluff (dbt templater)
+        run: sqlfluff lint models macros analyses snapshots --format github-annotation
+
+      - name: Parse dbt project (syntax/render checks)
+        run: dbt parse
+
+  build-pr:
+    name: dbt build on ephemeral Postgres (PRs)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: lint
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}
+      DB_HOST: 127.0.0.1
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: postgres
+      DB_SCHEMA: ci_${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install "dbt-postgres~=1.9.0"
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Debug connection (no network outside service)
+        run: dbt debug
+
+      - name: Seed + Build + Test
+        run: |
+          dbt seed --fail-fast
+          dbt build --fail-fast
+
+      - name: Generate docs
+        run: dbt docs generate
+
+  build-main:
+    name: dbt build on warehouse (main)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: lint
+    env:
+      DBT_PROFILES_DIR: ${{ github.workspace }}
+      DB_HOST: ${{ secrets.DB_HOST || 'localhost' }}
+      DB_USER: ${{ secrets.DB_USER || 'dbt_user' }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD || 'dbt_password' }}
+      DB_NAME: ${{ secrets.DB_NAME || 'dbt_warehouse' }}
+      DB_SCHEMA: ${{ secrets.DB_SCHEMA || 'public' }}
+      DBT_TARGET: ${{ vars.DBT_TARGET || 'dev' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install "dbt-postgres~=1.9.0"
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Build project (in the postgres db we created using docker)
+        run: |
+          dbt seed --target "$DBT_TARGET" --fail-fast
+          dbt build --target "$DBT_TARGET" --fail-fast
+
+      - name: Generate docs
+        run: dbt docs generate --target "$DBT_TARGET"

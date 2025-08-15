@@ -2,15 +2,14 @@
 name = "mdpi-dbt-project"
 version = "0.1.0"
 description = "MDPI DBT Assessment Project"
+readme = "README.md"
 requires-python = ">=3.9"
+
 dependencies = [
-    "dbt-postgres>=1.7.0",
-    "sqlfluff-templater-dbt>=3.4.0",
+    "dbt-postgres~=1.9.0",
+    "sqlfluff-templater-dbt~=3.4.2",
 ]
 
 [build-system]
-requires = ["hatchling>=1.18.0"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["mdpi-dbt-project"]
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"

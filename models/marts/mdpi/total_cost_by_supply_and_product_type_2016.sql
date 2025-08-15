@@ -8,7 +8,7 @@ with
 		where ordered_at >= '2016-01-01'
 			and ordered_at < '2017-01-01' 
 		group by product_id
-	) -- zero because data includes only 2024 & 2025
+	) -- This CTE will return zero records as the source data only contains orders from 2024 and 2025, not 2016. As a result, the report for 2016 will be empty.
 select
 	s.supply_name,
 	p.product_type,

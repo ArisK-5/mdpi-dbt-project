@@ -1,6 +1,6 @@
 -- 3. Get the top 3 customers by invoiced amount by month
 with
-order_totals as (
+customer_monthly_totals as (
     select
         date_trunc('month', ordered_at)::date as month,
         customer_id,
@@ -9,13 +9,13 @@ order_totals as (
     group by month, customer_id
 ),
 
-ranked as (
+ranked_monthly_totals as (
     select
         month,
         customer_id,
         invoiced_amount,
         dense_rank() over (partition by month order by invoiced_amount desc) as customer_rank
-    from order_totals
+    from customer_monthly_totals
 )
 
 select
@@ -24,7 +24,7 @@ select
     c.customer_name,
     r.invoiced_amount::numeric(10, 2) as invoiced_amount,
     r.customer_rank
-from ranked as r
+from ranked_monthly_totals as r
 left join {{ ref('customers') }} as c
     on r.customer_id = c.customer_id
 where r.customer_rank <= 3

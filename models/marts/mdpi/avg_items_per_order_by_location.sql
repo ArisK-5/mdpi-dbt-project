@@ -3,8 +3,7 @@ with
 agg_orders as (
     select
         location_id,
-        avg(count_order_items) as avg_items_per_order,
-        count(*) as orders_count
+        avg(count_order_items) as avg_items_per_order
     from {{ ref('orders') }}
     group by location_id
 )
@@ -12,7 +11,6 @@ agg_orders as (
 select
     l.location_id,
     l.location_name,
-    ao.orders_count,
     ao.avg_items_per_order::numeric(10, 2) as avg_items_per_order
 from agg_orders as ao
 left join {{ ref('locations') }} as l

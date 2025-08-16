@@ -47,7 +47,6 @@ jobs:
 
       - name: Auto-fix SQL with SQLFluff
         run: sqlfluff fix models
-        continue-on-error: true
 
       - name: Commit and push fixes (same-repo branches only)
         if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)

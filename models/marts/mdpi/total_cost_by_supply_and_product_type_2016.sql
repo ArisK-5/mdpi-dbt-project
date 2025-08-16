@@ -4,7 +4,7 @@ items_2016 as (
     select
         product_id,
         count(*) as items_sold
-    from marts.order_items
+    from {{ ref('order_items') }}
     where
         ordered_at >= '2016-01-01'
         and ordered_at < '2017-01-01'
@@ -16,9 +16,9 @@ select
     p.product_type,
     sum(i.items_sold * s.supply_cost)::numeric(10, 2) as total_cost_2016
 from items_2016 as i
-inner join marts.supplies as s
+inner join {{ ref('supplies') }} as s
     on i.product_id = s.product_id
-left join marts.products as p
+left join {{ ref('products') }} as p
     on i.product_id = p.product_id
 group by s.supply_name, p.product_type
 order by s.supply_name, p.product_type

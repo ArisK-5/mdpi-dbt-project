@@ -175,7 +175,7 @@ This workflow enforces SQL style in the dbt project and auto-fixes safe issues o
 
 4. `dbt parse --target lint` to compile models using the DuckDB target defined in profiles.yml.
 
-5. `sqlfluff fix models` (non-blocking) to auto-fix format issues.
+5. `sqlfluff fix models` (blocking) to auto-fix format issues.
 
 6. Auto-commit fixes to the branch when permitted (same-repo branches only).
 
@@ -183,12 +183,10 @@ This workflow enforces SQL style in the dbt project and auto-fixes safe issues o
 
 > Key configuration
 
-- .sqlfluff is set to `templater = dbt` with profile `postgres-dbt` and `target = lint`, using DuckDB per `profiles.yml` to keep CI self-contained.
+- .sqlfluff is set to `templater = dbt` with dialect `postgres-dbt` and `target = lint`, using DuckDB per `profiles.yml` to keep CI self-contained.
 
 - Only `models/\*_/_.sql` are auto-committed; adjust file_pattern to include macros if desired.
 
 > Why steps are non-blocking
-
-- sqlfluff fix exits non-zero if any unfixable violations remain; continue-on-error allows the job to proceed and commit fixes.
 
 - The lint step is advisory to surface annotations; to enforce zero violations, remove continue-on-error from the final lint step.

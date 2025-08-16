@@ -16,3 +16,4 @@ __pycache__
 
 # remove later
 NOTES.md
+ci_lint.duckdb

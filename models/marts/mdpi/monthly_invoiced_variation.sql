@@ -2,15 +2,15 @@
 with
 monthly as (
     select
-        date_trunc('month', ordered_at)::date as month,
+        date_trunc('month', ordered_at)::date as month_date,
         sum(order_total) as invoiced_amount,
         lag(sum(order_total)) over (order by date_trunc('month', ordered_at)::date) as prev_invoiced_amount
     from {{ ref('orders') }}
-    group by month
+    group by month_date
 )
 
 select
-    month,
+    month_date,
     invoiced_amount::numeric(10, 2) as invoiced_amount,
     prev_invoiced_amount::numeric(10, 2) as prev_invoiced_amount,
     (
@@ -20,4 +20,4 @@ select
         end
     )::numeric(10, 2) as invoiced_variation_pct
 from monthly
-order by month
+order by month_date

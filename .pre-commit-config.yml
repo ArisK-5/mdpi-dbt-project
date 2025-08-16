@@ -20,10 +20,8 @@ repos:
           - sqlfluff-templater-dbt~=3.4.2
           - dbt-duckdb~=1.9.4
         files: ^(models)/.*\.sql$
-      # Optional: run manually to auto-fix safe issues
       - id: sqlfluff-fix
-        name: sqlfluff fix (manual)
-        stages: [manual]
+        name: sqlfluff fix
         additional_dependencies:
           - sqlfluff-templater-dbt~=3.4.2
           - dbt-duckdb~=1.9.4

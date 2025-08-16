@@ -8,8 +8,8 @@ This repository contains the **Jaffle Shop DBT project** for the MDPI Data Engin
 
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
-  - [1. Install Dependencies and Basic Setup](#1-install-dependencies-and-basic-setup)
-  - [2. Set Up and Connect to the Database](#2-set-up-and-connect-to-the-database)
+  - [1. Install Dependencies and Basic Setup](#1-install-dependencies-and-environment-setup)
+  - [2. Set Up and Connect to the Database](#2-database-setup-and-connection)
   - [3. DBT Setup](#3-dbt-setup)
 - [Database Structure](#database-structure)
 - [CI Workflow](#ci-linting-workflow)
@@ -31,7 +31,7 @@ Make sure you have the following installed:
 
 ## Setup Instructions
 
-### 1. Install Dependencies and Basic Setup
+### 1. Install Dependencies and Environment Setup
 
 Clone the repository and navigate to the project folder:
 
@@ -67,7 +67,7 @@ direnv allow
 
 ---
 
-### 2. Set Up and Connect to the Database
+### 2. Database Setup and Connection
 
 Start the local PostgreSQL instance using Docker Compose:
 

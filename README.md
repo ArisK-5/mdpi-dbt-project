@@ -8,11 +8,11 @@ This repository contains the **Jaffle Shop DBT project** for the MDPI Data Engin
 
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
-  - [1. Install Dependencies and Basic Setup](#1-install-dependencies-and-environment-setup)
-  - [2. Set Up and Connect to the Database](#2-database-setup-and-connection)
+  - [1. Dependencies and Environment Setup](#1-dependencies-and-environment-setup)
+  - [2. Database Setup and Connection](#2-database-setup-and-connection)
   - [3. DBT Setup](#3-dbt-setup)
 - [Database Structure](#database-structure)
-- [CI Workflow](#ci-linting-workflow)
+- [CI/CD - Linting Workflow](#cicd---linting-workflow)
 
 ---
 
@@ -31,7 +31,7 @@ Make sure you have the following installed:
 
 ## Setup Instructions
 
-### 1. Install Dependencies and Environment Setup
+### 1. Dependencies and Environment Setup
 
 Clone the repository and navigate to the project folder:
 
@@ -149,46 +149,45 @@ mdpi_dbt_postgres/databases/dbt_warehouse/schemas/marts/tables
 
 ---
 
-## CI Linting Workflow
+## CI/CD - Linting Workflow
 
-This workflow enforces SQL style in the dbt project and auto-fixes safe issues on branches.
+This workflow enforces SQL style in the dbt project according to best practices and auto-fixes safe issues on branches.
 
 > What it does
 
 - Parses the dbt project with a safe DuckDB “lint” target to avoid real database connections.
-- Runs sqlfluff fix on models to auto-apply formatting.
+- Runs `sqlfluff fix` on models to auto-apply formatting.
 - Commits any changes back to the branch (same-repo branches and non-fork PRs).
-- Runs sqlfluff lint to publish annotations on the PR without failing the build.
+- Runs `sqlfluff lint` to publish annotations on the PR without failing the build.
 
 > When it runs
 
-- On pull_request, on pushes to main, and on manual runs (workflow_dispatch).
-- Concurrency ensures only one run per ref.
+- pull_request
+- pushes to main
+- manual runs (workflow_dispatch)
+
+Concurrency ensures only one run per ref.
 
 > How it works
 
-1. Checkout repo and set up Python 3.11.
+1. Checks out repo and sets up Python 3.11.
 
-2. Install tooling: `sqlfluff`, `sqlfluff-templater-dbt`, `dbt-duckdb`.
+2. Installs dependencies (`sqlfluff`, `sqlfluff-templater-dbt`, `dbt-duckdb`).
 
-3. `dbt deps` to install packages.
+3. Runs `dbt deps` to install dbt packages.
 
-4. `dbt parse --target lint` to compile models using the DuckDB target defined in profiles.yml.
+4. Runs `dbt parse --target lint` to compile models using the DuckDB target defined in profiles.yml.
 
-5. `sqlfluff fix models` (non-blocking) to auto-fix format issues.
+5. Runs `sqlfluff fix models` (blocking) to auto-fix format issues.
 
 6. Auto-commit fixes to the branch when permitted (same-repo branches only).
 
-7. `sqlfluff lint models --format github-annotation` (non-blocking) to add inline annotations to the PR Checks tab.
+7. Runs `sqlfluff lint models --format github-annotation` (non-blocking) to add inline annotations to the PR Checks tab.
+
+The lint step is advisory to surface annotations; to enforce zero violations, remove continue-on-error from the final lint step.
 
 > Key configuration
 
-- .sqlfluff is set to `templater = dbt` with profile `postgres-dbt` and `target = lint`, using DuckDB per `profiles.yml` to keep CI self-contained.
+- .sqlfluff is set to `templater = dbt` with dialect `postgres` and `target = lint`, using DuckDB per `profiles.yml` to keep CI self-contained.
 
 - Only `models/\*_/_.sql` are auto-committed; adjust file_pattern to include macros if desired.
-
-> Why steps are non-blocking
-
-- sqlfluff fix exits non-zero if any unfixable violations remain; continue-on-error allows the job to proceed and commit fixes.
-
-- The lint step is advisory to surface annotations; to enforce zero violations, remove continue-on-error from the final lint step.
